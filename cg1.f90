@@ -66,18 +66,40 @@ program main
                 ! since in CG in krylov space it is guranted to find the solution 
                 ! before no of iterations = size of  matrix
                 do i = 1,n 
-                        alpha = dot_product(r, r) / dot_product(p, matmul(A, p))
+                        alpha = dot_prod(r, r) / dot_prod(p, mat_prod(A, p))
                         x = x + alpha * p
-                        r_new = r - alpha * matmul(A, p)
+                        r_new = r - alpha * mat_prod(A, p)
                         
-                        if (sqrt(dot_product(r_new, r_new)) < tolerance) then
+                        if (sqrt(dot_prod(r_new, r_new)) < tolerance) then
                                 print *, "Converged at iteration:", i
                                 exit
                         end if
                         
-                        beta = dot_product(r_new, r_new) / dot_product(r, r)
+                        beta = dot_prod(r_new, r_new) / dot_prod(r, r)
                         p = r_new + beta * p
                         r = r_new
                 end do
         end function cg 
+        
+        function dot_prod(a, b) result(res)
+                real, dimension(:), intent(in) :: a, b
+                real :: res
+                res = sum(a * b)
+        end function dot_prod
+        
+        function mat_prod(A, v) result(result_vec)
+                real, dimension(:,:), intent(in) :: A
+                real, dimension(:), intent(in) :: v
+                real, dimension(size(v)) :: result_vec
+                integer :: i, j, n
+                
+                n = size(v)
+                do i = 1, n
+                        result_vec(i) = 0.0
+                        do j = 1, n
+                                result_vec(i) = result_vec(i) + A(i,j) * v(j)
+                        end do
+                end do
+        end function mat_prod
+
 end program main

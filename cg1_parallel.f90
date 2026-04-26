@@ -1,22 +1,24 @@
 program main 
-        integer                        :: n
+        !$use omp_lib
+        integer :: n
         real, allocatable, dimension(:,:) :: A 
         real, allocatable, dimension(:) :: b, x
         integer :: i, j
         
         ! Create A a diagonal matrix so that it is guaranteed to be symmetric 
         ! positive definite
+
         n = 5
-        
         ! Allocate arrays
         allocate(A(n,n))
         allocate(b(n))
         allocate(x(n))
         
-        ! Initialize A to diagonal matrix with positive entries
+        ! diagonal matrix for testing if the solution is correct and match against 
+        ! analytical solutions
         A = 0.0
         do i = 1, n
-                A(i,i) = real(i) * 2.0  ! Diagonal entries
+                A(i,i) = real(i) * 2.0  ! Diagonal entries: 2, 4, 6, 8, 10
         end do
 
         ! ! Dense symmetric positive definite matrix for benchmarking
@@ -26,6 +28,7 @@ program main
         !     end do
         ! end do
         ! A(i,i) = A(i,i) + real(n)
+
         
         ! Create b vector of same size
         b = 1.0
@@ -43,7 +46,7 @@ program main
         end do
 
         contains
-        function cg(A, b, n) result(x)
+        function cg(A, b,n) result(x)
                 ! inputs declarations 
                 integer , intent(in) :: n
                 real , dimension(n,n), intent(in) :: A
@@ -61,18 +64,19 @@ program main
                 r = b
                 p = r
                 
-                ! CG iterations
-                do i = 1, n 
+                ! since in CG in krylov space it is guranted to find the solution 
+                ! before no of iterations = size of  matrix
+                do i = 1,n 
                         ! Matrix-vector product: Ap = A * p (parallelized)
                         !$omp parallel do private(j)
                         do j = 1, n
-                                Ap(j) = dot_product(A(j,:), p)
+                                Ap(j) = dot_prod(A(j,:), p)
                         end do
                         !$omp end parallel do
                         
-                        ! Dot products (not parallelized - small overhead)
-                        rr = dot_product(r, r)
-                        pAp = dot_product(p, Ap)
+                        ! Dot products
+                        rr = dot_prod(r, r)
+                        pAp = dot_prod(p, Ap)
                         
                         alpha = rr / pAp
                         
@@ -90,14 +94,12 @@ program main
                         end do
                         !$omp end parallel do
                         
-                        ! Check convergence
-                        if (sqrt(dot_product(r_new, r_new)) < tolerance) then
+                        if (sqrt(dot_prod(r_new, r_new)) < tolerance) then
                                 print *, "Converged at iteration:", i
                                 exit
                         end if
                         
-                        ! Beta calculation
-                        beta = dot_product(r_new, r_new) / rr
+                        beta = dot_prod(r_new, r_new) / rr
                         
                         ! Update p: p = r_new + beta * p (parallelized)
                         !$omp parallel do
@@ -109,4 +111,11 @@ program main
                         r = r_new
                 end do
         end function cg 
+        
+        function dot_prod(a, b) result(res)
+                real, dimension(:), intent(in) :: a, b
+                real :: res
+                res = sum(a * b)
+        end function dot_prod
+
 end program main

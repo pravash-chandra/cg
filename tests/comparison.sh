@@ -9,7 +9,7 @@ echo "==========================================================================
 # Compile
 echo ""
 echo "[1/3] Compiling Serial Version..."
-gfortran -O3 cg_serial_benchmark.f90 -o cg_serial_benchmark
+gfortran -O3 cg_bench.f90 -o cg_bench
 if [ $? -ne 0 ]; then
     echo "❌ Serial compilation failed"
     exit 1
@@ -17,7 +17,7 @@ fi
 echo "✓ Serial compiled"
 
 echo "[2/3] Compiling OpenMP Version..."
-gfortran -O3 -fopenmp cg_openmp_benchmark.f90 -o cg_openmp_benchmark
+gfortran -O3 -fopenmp cg_parallel_bench.f90 -o cg_parallel_bench
 if [ $? -ne 0 ]; then
     echo "❌ OpenMP compilation failed"
     exit 1
@@ -32,7 +32,7 @@ echo "==========================================================================
 echo "SERIAL VERSION"
 echo "=========================================================================="
 
-SERIAL_OUTPUT=$(./cg_serial_benchmark)
+SERIAL_OUTPUT=$(./cg_bench)
 echo "$SERIAL_OUTPUT"
 
 echo ""
@@ -43,19 +43,19 @@ echo "==========================================================================
 echo ""
 echo "--- 1 Thread ---"
 export OMP_NUM_THREADS=1
-OPENMP_1=$(./cg_openmp_benchmark)
+OPENMP_1=$(./cg_parallel_bench)
 echo "$OPENMP_1"
 
 echo ""
 echo "--- 2 Threads ---"
 export OMP_NUM_THREADS=2
-OPENMP_2=$(./cg_openmp_benchmark)
+OPENMP_2=$(./cg_parallel_bench)
 echo "$OPENMP_2"
 
 echo ""
 echo "--- 4 Threads ---"
 export OMP_NUM_THREADS=4
-OPENMP_4=$(./cg_openmp_benchmark)
+OPENMP_4=$(./cg_parallel_bench)
 echo "$OPENMP_4"
 
 # Extract times and calculate speedup
@@ -99,18 +99,18 @@ for i in "${!serial_array[@]}"; do
     fi
 done
 
-echo ""
-echo "=========================================================================="
-echo "SUMMARY"
-echo "=========================================================================="
-echo ""
-echo "✓ Serial implementation: Tests 1000 to 15000 matrix sizes"
-echo "✓ OpenMP implementation: Tests with 1, 2, and 4 threads"
-echo "✓ Matrix type: Dense symmetric positive definite"
-echo "✓ Convergence tolerance: 1.0e-6"
-echo ""
-echo "To run with custom thread count:"
-echo "  export OMP_NUM_THREADS=8"
-echo "  ./cg_openmp_benchmark"
-echo ""
-echo "=========================================================================="
+# echo ""
+# echo "=========================================================================="
+# echo "SUMMARY"
+# echo "=========================================================================="
+# echo ""
+# echo "✓ Serial implementation: Tests 1000 to 15000 matrix sizes"
+# echo "✓ OpenMP implementation: Tests with 1, 2, and 4 threads"
+# echo "✓ Matrix type: Dense symmetric positive definite"
+# echo "✓ Convergence tolerance: 1.0e-6"
+# echo ""
+# echo "To run with custom thread count:"
+# echo "  export OMP_NUM_THREADS=8"
+# echo "  ./cg_openmp_benchmark"
+# echo ""
+# echo "=========================================================================="
