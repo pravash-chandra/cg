@@ -1,5 +1,5 @@
 program main 
-        integer, dimension(5) :: n_values
+        integer, dimension(7) :: n_values
         integer :: n, test_idx
         real, allocatable, dimension(:,:) :: A 
         real, allocatable, dimension(:) :: b, x
@@ -7,7 +7,7 @@ program main
         real :: start_time, end_time, elapsed_time
         
         ! Create an array of size 5 ranging from 5000 to 25000 for testing the speed
-        n_values = [5000, 10000, 15000, 20000, 25000]
+        n_values = [5000, 10000, 15000, 20000, 25000, 30000, 35000]
         
         ! Print header
         print *, "====== CG Solver Benchmarking (Sequential) ======"
